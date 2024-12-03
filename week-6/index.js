@@ -12,7 +12,7 @@ function generateToken(){
 app.post("/signup",function(req , res){
     const username = req.body.username;
     const password = req.body.password;
-
+    const body = req.body;
     users.push({
         username: username,
         password: password
