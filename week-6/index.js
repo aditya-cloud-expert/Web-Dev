@@ -1,44 +1,47 @@
 const express = require('express')
-const app = express()
+const app = express();
 
 app.use(express.json())
 
-const users = [];
+const users = []
 
-function generateToken(){
-    return Math.random();
-}
 
-app.post("/signup",function(req , res){
-    const username = req.body.username;
-    const password = req.body.password;
-    const body = req.body;
-    users.push({
-        username: username,
-        password: password
-    })
+function signup(req, res) {
+    const uname = req.body.username
+    const pwd = req.body.password
 
-    res.send({
-        users
-    }).status(200)
-})
-
-app.post("/signin", function(req, res){
-    const username = req.body.username;
-    const password = req.body.password;
-    let founduser = null;
-
-    for(let i =0; i < users.length; i++)
-    {
-        if(users[i].username == username && users[i].password == password)
-        {
-            
-            users[i].token = generateToken();
-            founduser = users[i];
-        }
+    // Check if user already exists
+    const existingUser = users.find(user => user.username === uname)
+    if (existingUser) {
+        return res.status(400).send('Username already exists'+ users)
     }
 
-    res.send({founduser}).status(200);
-})
+    users.push({
+        username: uname,
+        password: pwd
+    })
 
-app.listen(3000);
+    res.status(201).send('User created successfully')
+}
+
+function signin(req, res) {
+    const uname = req.body.username
+    const pwd = req.body.password
+
+    // Find user and verify password
+    const user = users.find(user => 
+        user.username === uname && user.password === pwd
+    )
+
+    if (!user) {
+        return res.status(401).send('Invalid username or password' + users)
+    }
+
+    res.status(200).send('Login successful')
+}
+
+app.post('/signin', signin)
+
+app.post('/signup', signup)
+
+app.listen(3000)
